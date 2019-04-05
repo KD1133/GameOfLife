@@ -10,8 +10,8 @@ namespace GameOfLife
     {
         static void Main(string[] args)
         {
-            StatrupService startupService = new StatrupService();
-            startupService.Start();
+            Startup startup = new Startup();
+            startup.Start();
         }
     }
 }

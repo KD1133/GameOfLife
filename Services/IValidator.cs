@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GameOfLife
 {
-    interface IValidationService
+    interface IValidatator
     {
         bool ValidateIntiger(string input);
         bool ValidateExistsInArray(int input, int arraySize);

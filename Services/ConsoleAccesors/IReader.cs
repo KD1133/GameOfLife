@@ -1,7 +1,7 @@
 ﻿
 namespace GameOfLife.ConsoleAccesors
 {
-    interface IReadingService
+    interface IReader
     {
         bool KeyPresed();
         string ReadKey();

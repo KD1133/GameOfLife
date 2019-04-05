@@ -1,164 +1,91 @@
-﻿using System;
+﻿using GameOfLife.Services;
+using System;
 
 namespace GameOfLife
 {
     class Board
     {
+        static private Random _Rnd = new Random();
+        private CellIterator _cellIterator;
+
         public int Width { get; private set; }
         public int Height { get; private set; }
         public int Iteration { get; private set; }
-
-
-        public bool[,] Cells { get; private set; }
-        public bool[,] PreviousCells { get; private set; }
         public int LiveCells { get; private set; }
-        static private Random _Rnd = new Random();
+        public bool[,] Cells { get; set; }
+        public bool[,] PreviousCells { get; set; }
 
-        public Board(int width,int height)
+        public Board(int width, int height, CellIterator cellIterator)
         {
-            this.Width = width;
-            this.Height = height;
-            Cells = new bool[Width, Height];
-            PreviousCells = new bool[Width, Height];
-            for (int j = 0; j < Height; j++)
-            {
-                for (int i = 0; i < Width; i++)
-                {
-                    
-                    Cells[i,j] = _Rnd.Next(2) < 1 ? true : false;
-                }
-            }
+            Width = width;
+            Height = height;
+            Cells = new bool[width, height];
+            PreviousCells = new bool[width, height];
+            _cellIterator = cellIterator;
         }
 
-        public void UpdateCell(int x, int y)
+        public bool[,] GetCells()
         {
-            this.Cells[x, y] = !this.Cells[x, y];
+            return Cells;
+        }
+
+        public bool[,] GetPreviousCells()
+        {
+            return PreviousCells;
+        }
+
+        public void RandomizeCells()
+        {
+            for (int y = 0; y < Cells.GetLength(1); y++)
+            {
+                for (int x = 0; x < Cells.GetLength(0); x++)
+                {
+
+                    Cells[x, y] = _Rnd.Next(2) < 1 ? true : false;
+                }
+            }
         }
 
         public void ClearCells()
         {
-            for (int i = 0; i < this.Width; i++) 
+            for (int y = 0; y < Cells.GetLength(1); y++)
             {
-                for (int j = 0; j < this.Height; j++)
+                for (int x = 0; x < Cells.GetLength(0); x++)
                 {
-                    this.PreviousCells[i, j] = true;
-                    this.Cells[i, j] = false;
+                    PreviousCells[x, y] = true;
+                    Cells[x, y] = false;
                 }
             }
+        }
+
+        public void InvertCell(int x, int y)
+        {
+            Cells[x, y] = !Cells[x, y];
+        }
+
+        public void UpdateCell(int x, int y, bool state)
+        {
+            Cells[x, y] = state;
         }
 
         public void Iterate()
         {
             PreviousCells = Cells.Clone() as bool[,];
             LiveCells = 0;
-            for (int j = 0; j < Height; j++)
+            for (int y = 0; y < Height; y++)
             {
-                for (int i = 0; i < Width; i++)
+                for (int x = 0; x < Width; x++)
                 {
-                    int livingNeighbours = 0;
-                    int iLooped;
-                    int jLooped;
-                    if (i == 0)
-                    {
-                        iLooped = Width;
-                    }
-                    else
-                    {
-                        iLooped = i;
-                    }
-                    if (PreviousCells[iLooped - 1, j] == true) livingNeighbours++; //left neigbour
-
-                    if (j == 0)
-                    {
-                        jLooped = Height;
-                    }
-                    else
-                    {
-                        jLooped = j;
-                    }
-                    if (PreviousCells[iLooped - 1, jLooped - 1] == true) livingNeighbours++; //top left neigbour
+                    int livingNeighbours = _cellIterator.CountLiveNeigbours(x, y, Cells, PreviousCells);
                     
-
-                    if (j + 1 == Height)
+                    if(_cellIterator.WillSurvive(x, y, livingNeighbours, PreviousCells[x, y]))
                     {
-                        jLooped = -1;
+                        UpdateCell(x, y, true);
+                        LiveCells++;
                     }
                     else
                     {
-                        jLooped = j;
-                    }
-                    if (PreviousCells[iLooped - 1, jLooped + 1] == true) livingNeighbours++; //bottom left neigbour
-                    
-                    if (i + 1 == Width)
-                    {
-                        iLooped = -1;
-                    }
-                    else
-                    {
-                        iLooped = i;
-                    }
-                    if (PreviousCells[iLooped + 1, j] == true) livingNeighbours++; //right neigbour
-
-                    if (j == 0)
-                    {
-                        jLooped = Height;
-                    }
-                    else
-                    {
-                        jLooped = j;
-                    }
-                    if (PreviousCells[iLooped + 1, jLooped - 1] == true) livingNeighbours++; //top right neigbour
-
-
-                    if (j + 1 == Height)
-                    {
-                        jLooped = -1;
-                    }
-                    else
-                    {
-                        jLooped = j;
-                    }
-                    if (PreviousCells[iLooped + 1, jLooped + 1] == true) livingNeighbours++; //bottom right neigbour
-
-                    if (j == 0)
-                    {
-                        jLooped = Height;
-                    }
-                    else
-                    {
-                        jLooped = j;
-                    }
-                    if (PreviousCells[i, jLooped - 1] == true) livingNeighbours++; //top neigbour
-
-
-                    if (j + 1 == Height)
-                    {
-                        jLooped = -1;
-                    }
-                    else
-                    {
-                        jLooped = j;
-                    }
-                    if (PreviousCells[i, jLooped + 1] == true) livingNeighbours++; //bottom neigbour
-
-                    if (PreviousCells[i, j] == false)
-                    {
-                        if (livingNeighbours == 3)
-                        {
-                            Cells[i, j] = true;
-                            LiveCells++;
-                        }
-                    }
-                    else
-                    {
-                        if (livingNeighbours < 2 || livingNeighbours > 3)
-                        {
-                            Cells[i, j] = false;
-                        }
-                        else
-                        {
-                            LiveCells++;
-                        }
+                        UpdateCell(x, y, false);
                     }
                 }
             }

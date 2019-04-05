@@ -4,8 +4,17 @@ using System.IO;
 
 namespace GameOfLife
 {
-    class FileAccesingService : IFileAccesingService
+    class FileAccesor : IFileAccesor
     {
+        private BoardFactory _boardFactory;
+        public List<Board> Boards;
+
+        public FileAccesor(BoardFactory boardFactory, List<Board> boards)
+        {
+            _boardFactory = boardFactory;
+            Boards = boards;
+        }
+
         public struct LoadData
         {
             public List<Board> boards;
@@ -28,13 +37,14 @@ namespace GameOfLife
             {
                 tw.Write(boardNumber);
             }
+            tw.WriteLine();
 
-            foreach (Board board in boards){
+            foreach (var board in boards){
                 for (int j = 0; j < board.Height; j++)
                 {
                     for (int i = 0; i < board.Width; i++)
                     {
-                        tw.Write(board.Cells[i,j] ? 1 : 0);
+                        tw.Write(board.GetCells()[i,j] ? 1 : 0);
                     }
                     tw.WriteLine();
                 } 
@@ -45,10 +55,8 @@ namespace GameOfLife
         public LoadData Load()
         {
 
-            LoadData loadData = new LoadData();
-
-            List<Board> boards = new List<Board>();
-
+            var loadData = new LoadData();
+            
             loadData.displayedBoards = new List<int>();
 
             if (!File.Exists("SavedGame.txt"))
@@ -65,32 +73,32 @@ namespace GameOfLife
             int displayedBoardCount = int.Parse(tr.ReadLine()); 
             for (int i = 0; i < displayedBoardCount; i++)
             {
-                loadData.displayedBoards.Add(int.Parse(tr.Read().ToString()) - 48);
+                loadData.displayedBoards.Add(int.Parse(tr.Read().ToString()) - 48); //-48 converts from ascii to int value 
             }
             tr.ReadLine();
 
             for (int boardNumber = 0; boardNumber < boardCount; boardNumber++)
             {
-                Board board = new Board(loadData.width, loadData.height);
+                var board = _boardFactory.CreateBoard(loadData.width, loadData.height);
                 for (int j = 0; j < board.Height; j++)
                 {
                     for (int i = 0; i < board.Width; i++)
                     {
-                        int a = int.Parse(tr.Read().ToString()); //tr.Read reads ASCII 
-                        if (a == 49) //ASCII value
+                        int a = int.Parse(tr.Read().ToString()) - 48; //-48 converts from ascii to int value 
+                        if (a == 1) 
                         {
-                            board.Cells[i, j] = true;
+                            board.GetCells()[i, j] = true;
                         }
                         else
                         {
-                            board.Cells[i, j] = false;
+                            board.GetCells()[i, j] = false;
                         }
                     }
                     tr.ReadLine();
                 }
-                boards.Add(board);
+                Boards.Add(board);
             }
-            loadData.boards = boards;
+            loadData.boards = Boards;
 
             tr.Close();
 

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GameOfLife.ConsoleAccesors
 {
-    interface IDrawingService
+    interface IDrawer
     {
         void Clear();
         void DispalyCursor(int x, int y);

@@ -2,13 +2,15 @@
 using System;
 namespace GameOfLife
 {
-    class ReadingService : IReadingService
+    class Reader : IReader
     {
-        private ValidationService _Validator { get; set; }
+        private IValidatator _validationService { get; set; }
+        private ConsoleFacade _consoleFacade { get; set; }
 
-        public ReadingService()
+        public Reader(IValidatator validationService, ConsoleFacade consoleFacade)
         {
-            _Validator = new ValidationService();
+            _validationService = validationService;
+            _consoleFacade = consoleFacade;
         }
 
         public bool KeyPresed()
@@ -25,16 +27,14 @@ namespace GameOfLife
 
         public string ReadKey()
         {
-            ConsoleKey input;
-            input = Console.ReadKey(true).Key;
-            return input.ToString();
+            return _consoleFacade.ReadKey();
         }
 
         public int ReadIntiger()
         {
             string input;
-            input = Console.ReadLine();
-            if (!_Validator.ValidateIntiger(input))
+            input = _consoleFacade.ReadLine();
+            if (!_validationService.ValidateIntiger(input))
             {
                 return 0;
             }
