@@ -29,16 +29,14 @@ namespace GameOfLife
 
             _boardsController.NewGame(width, height);
 
-            for (int i = 0; i < n; i++)
-            {
-                _boardsController.AddBoard();
-            }
+            _boardsController.AddBoards(n);
 
             int input;
             do
             {
                 _drawer.WriteLine("Input board to be displayed number(maximum of 8 boards, input 0 to continue) : ");
                 input = _reader.ReadIntiger();
+                
                 if (input == 0 || !_validator.ValidateExistsInArray(input, _boardsController.Boards.Count))
                 {
                     break;
